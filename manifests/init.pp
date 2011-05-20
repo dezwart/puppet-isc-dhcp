@@ -55,7 +55,11 @@ class isc-dhcp( $interfaces = undef,
 		$netmask = undef,
 		$range_start = undef,
 		$range_end = undef,
-		$routers = undef ) {
+		$routers = undef,
+		$dynamic_dns_key = undef,
+		$dynamic_dns_forward_zone = undef,
+		$dynamic_dns_reverse_zone = undef,
+		$dynamic_dns_ns_master = undef ) {
 	package { 'isc-dhcp-server':
 		ensure	=> installed,
 	}
@@ -84,5 +88,25 @@ class isc-dhcp( $interfaces = undef,
 		pattern		=> '/usr/sbin/dhcpd',
 		require		=> Package['isc-dhcp-server'],
 		subscribe	=> [ File['/etc/default/isc-dhcp-server'], File['/etc/dhcp/dhcpd.conf'] ],
+	}
+
+	if $ddns_update_style != 'none' {
+		file { '/etc/dhcp/dynamic-dns.key':
+			ensure	=> file,
+			owner	=> root,
+			group	=> root,
+			mode	=> '0640',
+			content	=> template('isc-dhcp/dynamic-dns.key.erb'),
+			notify	=> Service['isc-dhcp-server'],
+		}
+
+		file { '/etc/dhcp/dhcpd.conf.local':
+			ensure	=> file,
+			owner	=> root,
+			group	=> root,
+			mode	=> '0644',
+			content	=> template('isc-dhcp/dhcpd.conf.local.erb'),
+			notify	=> Service['isc-dhcp-server'],
+		}
 	}
 }

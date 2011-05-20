@@ -105,3 +105,8 @@ log-facility local7;
 #    range 10.0.29.10 10.0.29.230;
 #  }
 #}
+
+<% if subnet != :undef && netmask != :undef && range_start != :undef && range_end != :undef && routers != :undef %>subnet <%= subnet %> netmask <%= netmask %> {
+	range <%= range_start %> <%= range_end %>;
+	option routers <% if routers != :undef %><% first = true %><% routers.each do |router| -%><% if first != true %>, <%= router %><% else %><%= router %><% first = false %><% end %><% end %><% end %>;
+}<% end %>

@@ -1,5 +1,8 @@
 # isc-dhcp service
 #
+# This class needs to use multi-part files to allow for multiple subnets to be
+# defined.
+#
 # == Parameters
 #
 # [*interfaces*]
@@ -47,7 +50,12 @@ class isc-dhcp( $interfaces = undef,
 		$domain_name_servers = [ 'ns1.example.org', 'ns2.example.org' ],
 		$default_lease_time = 600,
 		$max_lease_time = 7200,
-		$authoritative = false ) {
+		$authoritative = false,
+		$subnet = undef,
+		$netmask = undef,
+		$range_start = undef,
+		$range_end = undef,
+		$routers = undef ) {
 	package { 'isc-dhcp-server':
 		ensure	=> installed,
 	}
@@ -70,9 +78,10 @@ class isc-dhcp( $interfaces = undef,
 		require => Package['isc-dhcp-server'],
 	}
 
-	service { 'dhcpd':
+	service { 'isc-dhcp-server':
 		ensure		=> running,
 		enable		=> true,
+		pattern		=> '/usr/sbin/dhcpd',
 		require		=> Package['isc-dhcp-server'],
 		subscribe	=> [ File['/etc/default/isc-dhcp-server'], File['/etc/dhcp/dhcpd.conf'] ],
 	}

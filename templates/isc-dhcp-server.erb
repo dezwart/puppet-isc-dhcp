@@ -12,5 +12,5 @@
 #
 
 # On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
-#	Separate multiple interfaces with spaces, e.g. "eth0 eth1".
+# Separate multiple interfaces with spaces, e.g. "eth0 eth1".
 INTERFACES="<% if interfaces != :undef %><% first = true %><% interfaces.each do |interface| -%><% if first != true %> <%= interface %><% else %><%= interface %><% first = false %><% end %><% end %><% end %>"

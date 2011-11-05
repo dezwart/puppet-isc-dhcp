@@ -45,68 +45,68 @@
 #    }
 #
 class isc-dhcp( $interfaces = undef,
-		$ddns_update_style = 'none',
-		$domain_name = 'example.org',
-		$domain_name_servers = [ 'ns1.example.org', 'ns2.example.org' ],
-		$default_lease_time = 600,
-		$max_lease_time = 7200,
-		$authoritative = false,
-		$subnet = undef,
-		$netmask = undef,
-		$range_start = undef,
-		$range_end = undef,
-		$routers = undef,
-		$dynamic_dns_key = undef,
-		$dynamic_dns_forward_zone = undef,
-		$dynamic_dns_reverse_zone = undef,
-		$dynamic_dns_ns_master = undef ) {
-	package { 'isc-dhcp-server':
-		ensure	=> installed,
-	}
+        $ddns_update_style = 'none',
+        $domain_name = 'example.org',
+        $domain_name_servers = [ 'ns1.example.org', 'ns2.example.org' ],
+        $default_lease_time = 600,
+        $max_lease_time = 7200,
+        $authoritative = false,
+        $subnet = undef,
+        $netmask = undef,
+        $range_start = undef,
+        $range_end = undef,
+        $routers = undef,
+        $dynamic_dns_key = undef,
+        $dynamic_dns_forward_zone = undef,
+        $dynamic_dns_reverse_zone = undef,
+        $dynamic_dns_ns_master = undef ) {
+    package { 'isc-dhcp-server':
+        ensure  => installed,
+    }
 
-	file { '/etc/default/isc-dhcp-server':
-		ensure	=> file,
-		owner	=> root,
-		group	=> root,
-		mode	=> '0644',
-		content	=> template('isc-dhcp/isc-dhcp-server.erb'),
-		require => Package['isc-dhcp-server'],
-	}
+    file { '/etc/default/isc-dhcp-server':
+        ensure  => file,
+        owner   => root,
+        group   => root,
+        mode    => '0644',
+        content => template('isc-dhcp/isc-dhcp-server.erb'),
+        require => Package['isc-dhcp-server'],
+    }
 
-	file { '/etc/dhcp/dhcpd.conf':
-		ensure	=> file,
-		owner	=> root,
-		group	=> root,
-		mode	=> '0644',
-		content	=> template('isc-dhcp/dhcpd.conf.erb'),
-		require => Package['isc-dhcp-server'],
-	}
+    file { '/etc/dhcp/dhcpd.conf':
+        ensure  => file,
+        owner   => root,
+        group   => root,
+        mode    => '0644',
+        content => template('isc-dhcp/dhcpd.conf.erb'),
+        require => Package['isc-dhcp-server'],
+    }
 
-	service { 'isc-dhcp-server':
-		ensure		=> running,
-		enable		=> true,
-		pattern		=> '/usr/sbin/dhcpd',
-		require		=> Package['isc-dhcp-server'],
-		subscribe	=> [ File['/etc/default/isc-dhcp-server'], File['/etc/dhcp/dhcpd.conf'] ],
-	}
+    service { 'isc-dhcp-server':
+        ensure      => running,
+        enable      => true,
+        pattern     => '/usr/sbin/dhcpd',
+        require     => Package['isc-dhcp-server'],
+        subscribe   => [ File['/etc/default/isc-dhcp-server'], File['/etc/dhcp/dhcpd.conf'] ],
+    }
 
-	if $ddns_update_style != 'none' {
-		file { '/etc/dhcp/dynamic-dns.key':
-			ensure	=> file,
-			owner	=> root,
-			group	=> root,
-			mode	=> '0640',
-			content	=> template('isc-dhcp/dynamic-dns.key.erb'),
-			notify	=> Service['isc-dhcp-server'],
-		}
+    if $ddns_update_style != 'none' {
+        file { '/etc/dhcp/dynamic-dns.key':
+            ensure  => file,
+            owner   => root,
+            group   => root,
+            mode    => '0640',
+            content => template('isc-dhcp/dynamic-dns.key.erb'),
+            notify  => Service['isc-dhcp-server'],
+        }
 
-		file { '/etc/dhcp/dhcpd.conf.local':
-			ensure	=> file,
-			owner	=> root,
-			group	=> root,
-			mode	=> '0644',
-			content	=> template('isc-dhcp/dhcpd.conf.local.erb'),
-			notify	=> Service['isc-dhcp-server'],
-		}
-	}
+        file { '/etc/dhcp/dhcpd.conf.local':
+            ensure  => file,
+            owner   => root,
+            group   => root,
+            mode    => '0644',
+            content => template('isc-dhcp/dhcpd.conf.local.erb'),
+            notify  => Service['isc-dhcp-server'],
+        }
+    }
 }

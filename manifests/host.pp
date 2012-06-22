@@ -2,7 +2,7 @@
 #
 # == Parameters
 #
-# [*MAC*]
+# [*mac*]
 #   Machine Address Code of the host.
 #
 # [*routers*]
@@ -17,7 +17,7 @@
 #        routers    => [ '192.168.0.1', '192.168.0.2' ],
 #    }
 #
-define isc-dhcpd::zone($MAC = undef,
+define isc-dhcpd::host($mac = undef,
     $routers = undef) {
 
     file { "$isc-dhcpd::dhcpd_conf_local_file_fragments_directory/01_dhcpd.conf.local_host_fragment_$name":

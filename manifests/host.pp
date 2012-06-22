@@ -20,13 +20,13 @@
 define isc-dhcp::host($mac = undef,
     $routers = undef) {
 
-    file { "$isc-dhcp::dhcp_conf_local_file_fragments_directory/01_dhcp.conf.local_host_fragment_$name":
+    file { "$isc-dhcp::dhcpd_conf_local_file_fragments_directory/01_dhcpd.conf.local_host_fragment_$name":
         ensure  => file,
         owner   => root,
         group   => root,
         mode    => '0644',
         content => template('isc-dhcp/dhcpd.conf.local_host_fragment.erb'),
-        require => File[$isc-dhcp::dhcp_conf_local_file_fragments_directory],
-        notify  => Exec[$isc-dhcp::dhcp_conf_local_file_assemble],
+        require => File[$isc-dhcp::dhcpd_conf_local_file_fragments_directory],
+        notify  => Exec[$isc-dhcp::dhcpd_conf_local_file_assemble],
     }
 }

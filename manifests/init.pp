@@ -60,7 +60,10 @@ class isc-dhcp( $interfaces = undef,
         $dynamic_dns_forward_zone = undef,
         $dynamic_dns_reverse_zone = undef,
         $dynamic_dns_ns_master = undef ) {
-    package { 'isc-dhcp-server':
+    $package = 'isc-dhcp-server'
+    $service = 'isc-dhcp-server'
+
+    package { $package:
         ensure  => installed,
     }
 
@@ -70,7 +73,7 @@ class isc-dhcp( $interfaces = undef,
         group   => root,
         mode    => '0644',
         content => template('isc-dhcp/isc-dhcp-server.erb'),
-        require => Package['isc-dhcp-server'],
+        require => Package[$package],
     }
 
     file { '/etc/dhcp/dhcpd.conf':
@@ -79,14 +82,14 @@ class isc-dhcp( $interfaces = undef,
         group   => root,
         mode    => '0644',
         content => template('isc-dhcp/dhcpd.conf.erb'),
-        require => Package['isc-dhcp-server'],
+        require => Package[$package],
     }
 
-    service { 'isc-dhcp-server':
+    service { $package:
         ensure      => running,
         enable      => true,
         pattern     => '/usr/sbin/dhcpd',
-        require     => Package['isc-dhcp-server'],
+        require     => Package[$package],
         subscribe   => [ File['/etc/default/isc-dhcp-server'], File['/etc/dhcp/dhcpd.conf'] ],
     }
 
@@ -97,16 +100,16 @@ class isc-dhcp( $interfaces = undef,
             group   => root,
             mode    => '0640',
             content => template('isc-dhcp/dynamic-dns.key.erb'),
-            notify  => Service['isc-dhcp-server'],
+            notify  => Service[$service],
         }
 
-        file { '/etc/dhcp/dhcpd.conf.local':
+        file { '/etc/dhcp/dhcpd.conf.ddns':
             ensure  => file,
             owner   => root,
             group   => root,
             mode    => '0644',
-            content => template('isc-dhcp/dhcpd.conf.local.erb'),
-            notify  => Service['isc-dhcp-server'],
+            content => template('isc-dhcp/dhcpd.conf.ddns.erb'),
+            notify  => Service[$service],
         }
     }
 }

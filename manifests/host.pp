@@ -25,7 +25,7 @@ define isc-dhcp::host($mac = undef,
         owner   => root,
         group   => root,
         mode    => '0644',
-        content => template('isc-dhcp/dhcp.conf.local_host_fragment.erb'),
+        content => template('isc-dhcp/dhcpd.conf.local_host_fragment.erb'),
         require => File[$isc-dhcp::dhcp_conf_local_file_fragments_directory],
         notify  => Exec[$isc-dhcp::dhcp_conf_local_file_assemble],
     }

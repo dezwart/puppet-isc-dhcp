@@ -13,7 +13,7 @@
 # == Examples
 #
 #    isc-dhcp::host { 'bar.foo.com':
-#        MAC        => '0:0:c0:5d:bd:95',
+#        mac        => '0:0:c0:5d:bd:95',
 #        routers    => [ '192.168.0.1', '192.168.0.2' ],
 #    }
 #

@@ -77,6 +77,14 @@ class isc-dhcp( $interfaces = undef,
         require => Package[$package],
     }
 
+    file { $conf_dir:
+        ensure  => directory,
+        owner   => root,
+        group   => root,
+        mode    => '2774',
+        require => Package[$package],
+    }
+
     file { "$conf_dir/dhcpd.conf":
         ensure  => file,
         owner   => root,
@@ -121,7 +129,7 @@ class isc-dhcp( $interfaces = undef,
     file { $dhcpd_conf_local:
         ensure  => file,
         owner   => root,
-        group   => $group,
+        group   => root,
         mode    => '0640',
         require => Package[$package],
         notify  => Service[$service],
@@ -130,7 +138,7 @@ class isc-dhcp( $interfaces = undef,
     file { $dhcpd_conf_local_file_fragments_directory:
         ensure  => directory,
         owner   => root,
-        group   => $group,
+        group   => root,
         mode    => '0700',
         require => [Package[$package], File[$conf_dir]],
         recurse => true,
@@ -151,7 +159,7 @@ class isc-dhcp( $interfaces = undef,
     file { $dhcpd_conf_local_preamble:
         ensure  => file,
         owner   => root,
-        group   => $group,
+        group   => root,
         mode    => '0600',
         require => Package[$package],
         content => template("isc-dhcp/dhcpd.conf.local_preamble.erb"),

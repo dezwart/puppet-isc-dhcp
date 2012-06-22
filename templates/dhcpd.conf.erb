@@ -8,7 +8,8 @@
 # behavior of the version 2 packages ('none', since DHCP v2 didn't
 # have support for DDNS.)
 ddns-update-style <%= ddns_update_style %>;
-<% if ddns_update_style != 'none' %>include "/etc/dhcp/dhcpd.conf.local";<% end %>
+<% if ddns_update_style != 'none' %>include "/etc/dhcp/dhcpd.conf.ddns";<% end %>
+include "/etc/dhcp/dhcpd.conf.local";
 
 # option definitions common to all supported networks...
 option domain-name "<%= domain_name %>";

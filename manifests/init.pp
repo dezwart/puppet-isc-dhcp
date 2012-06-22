@@ -62,6 +62,7 @@ class isc-dhcp( $interfaces = undef,
         $dynamic_dns_ns_master = undef ) {
     $package = 'isc-dhcp-server'
     $service = 'isc-dhcp-server'
+    $conf_dir = '/etc/dhcp'
 
     package { $package:
         ensure  => installed,
@@ -76,7 +77,7 @@ class isc-dhcp( $interfaces = undef,
         require => Package[$package],
     }
 
-    file { '/etc/dhcp/dhcpd.conf':
+    file { "$conf_dir/dhcpd.conf":
         ensure  => file,
         owner   => root,
         group   => root,
@@ -90,11 +91,11 @@ class isc-dhcp( $interfaces = undef,
         enable      => true,
         pattern     => '/usr/sbin/dhcpd',
         require     => Package[$package],
-        subscribe   => [ File['/etc/default/isc-dhcp-server'], File['/etc/dhcp/dhcpd.conf'] ],
+        subscribe   => [ File['/etc/default/isc-dhcp-server'], File["$conf_dir/dhcpd.conf"] ],
     }
 
     if $ddns_update_style != 'none' {
-        file { '/etc/dhcp/dynamic-dns.key':
+        file { "$conf_dir/dynamic-dns.key":
             ensure  => file,
             owner   => root,
             group   => root,
@@ -103,7 +104,7 @@ class isc-dhcp( $interfaces = undef,
             notify  => Service[$service],
         }
 
-        file { '/etc/dhcp/dhcpd.conf.ddns':
+        file { "$conf_dir/dhcpd.conf.ddns":
             ensure  => file,
             owner   => root,
             group   => root,
@@ -111,5 +112,49 @@ class isc-dhcp( $interfaces = undef,
             content => template('isc-dhcp/dhcpd.conf.ddns.erb'),
             notify  => Service[$service],
         }
+    }
+
+    # dhcpd.conf.local file fragments pattern, purges unmanaged files
+    $dhcpd_conf_local = "$conf_dir/dhcpd.conf.local"
+    $dhcpd_conf_local_file_fragments_directory = "${dhcpd_conf_local}.d"
+
+    file { $dhcpd_conf_local:
+        ensure  => file,
+        owner   => root,
+        group   => $group,
+        mode    => '0640',
+        require => Package[$package],
+        notify  => Service[$service],
+    }
+
+    file { $dhcpd_conf_local_file_fragments_directory:
+        ensure  => directory,
+        owner   => root,
+        group   => $group,
+        mode    => '0700',
+        require => [Package[$package], File[$conf_dir]],
+        recurse => true,
+        purge   => true,
+        notify  => Exec['dhcpd_conf_local_file_assemble'],
+    }
+
+    $dhcpd_conf_local_file_assemble = 'dhcpd_conf_local_file_assemble'
+    exec { $dhcpd_conf_local_file_assemble:
+        refreshonly => true,
+        require     => [ File[$dhcpd_conf_local_file_fragments_directory], File[$dhcpd_conf_local] ],
+        notify      => Service[$service],
+        command     => "/bin/cat ${dhcpd_conf_local_file_fragments_directory}/*_dhcpd.conf.local_* > ${dhcpd_conf_local}",
+    }
+
+    $dhcpd_conf_local_preamble = "${dhcpd_conf_local_file_fragments_directory}/00_dhcpd.conf.local_preamble"
+
+    file { $dhcpd_conf_local_preamble:
+        ensure  => file,
+        owner   => root,
+        group   => $group,
+        mode    => '0600',
+        require => Package[$package],
+        content => template("isc-dhcp/dhcpd.conf.local_preamble.erb"),
+        notify  => Exec['dhcpd_conf_local_file_assemble'],
     }
 }

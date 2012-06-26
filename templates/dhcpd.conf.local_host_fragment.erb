@@ -5,4 +5,5 @@ host <%= name %> {
     hardware ethernet <%= mac %>;
     fixed-address <%= name %>;
 <% if @routers %><% first = true %> option routers <% routers.each do |router| -%><% if first != true %>, <%= router %><% else %><%= router %><% first = false %><% end %><% end %><% end %>
+<% if @filename %>  filename "<%= filename %>";<% end %>
 }

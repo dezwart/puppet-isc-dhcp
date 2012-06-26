@@ -1,4 +1,4 @@
-# isc-dhcp service
+# isc_dhcp service
 #
 # This class needs to use multi-part files to allow for multiple subnets to be
 # defined.
@@ -34,7 +34,7 @@
 #
 # == Examples
 #
-#    class { 'isc-dhcp':
+#    class { 'isc_dhcp':
 #        interfaces => [ 'eth0', 'eth1' ],
 #        ddns_update_style = 'none',
 #        domain_name => 'example.org',
@@ -44,7 +44,7 @@
 #        authoritative = true,
 #    }
 #
-class isc-dhcp( $interfaces = undef,
+class isc_dhcp( $interfaces = undef,
         $ddns_update_style = 'none',
         $domain_name = 'example.org',
         $domain_name_servers = [ 'ns1.example.org', 'ns2.example.org' ],
@@ -73,7 +73,7 @@ class isc-dhcp( $interfaces = undef,
         owner   => root,
         group   => root,
         mode    => '0644',
-        content => template('isc-dhcp/isc-dhcp-server.erb'),
+        content => template('isc_dhcp/isc-dhcp-server.erb'),
         require => Package[$package],
     }
 
@@ -90,7 +90,7 @@ class isc-dhcp( $interfaces = undef,
         owner   => root,
         group   => root,
         mode    => '0644',
-        content => template('isc-dhcp/dhcpd.conf.erb'),
+        content => template('isc_dhcp/dhcpd.conf.erb'),
         require => Package[$package],
     }
 
@@ -108,7 +108,7 @@ class isc-dhcp( $interfaces = undef,
             owner   => root,
             group   => root,
             mode    => '0640',
-            content => template('isc-dhcp/dynamic-dns.key.erb'),
+            content => template('isc_dhcp/dynamic-dns.key.erb'),
             notify  => Service[$service],
         }
 
@@ -117,7 +117,7 @@ class isc-dhcp( $interfaces = undef,
             owner   => root,
             group   => root,
             mode    => '0644',
-            content => template('isc-dhcp/dhcpd.conf.ddns.erb'),
+            content => template('isc_dhcp/dhcpd.conf.ddns.erb'),
             notify  => Service[$service],
         }
     }
@@ -162,7 +162,7 @@ class isc-dhcp( $interfaces = undef,
         group   => root,
         mode    => '0600',
         require => Package[$package],
-        content => template("isc-dhcp/dhcpd.conf.local_preamble.erb"),
+        content => template("isc_dhcp/dhcpd.conf.local_preamble.erb"),
         notify  => Exec['dhcpd_conf_local_file_assemble'],
     }
 }

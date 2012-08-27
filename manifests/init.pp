@@ -64,6 +64,14 @@ class isc_dhcp( $interfaces = undef,
     $service = 'isc-dhcp-server'
     $conf_dir = '/etc/dhcp'
 
+  if $lsbdistid == 'Ubuntu' {
+    $user = 'dhcpd'
+    $group = 'dhcpd'
+  } else {
+    $user = 'root'
+    $group = 'root'
+  }
+
     package { $package:
         ensure  => installed,
     }
@@ -105,8 +113,8 @@ class isc_dhcp( $interfaces = undef,
     if $ddns_update_style != 'none' {
         file { "$conf_dir/dynamic-dns.key":
             ensure  => file,
-            owner   => root,
-            group   => root,
+            owner   => $user,
+            group   => $group,
             mode    => '0640',
             content => template('isc_dhcp/dynamic-dns.key.erb'),
             notify  => Service[$service],
@@ -128,8 +136,8 @@ class isc_dhcp( $interfaces = undef,
 
     file { $dhcpd_conf_local:
         ensure  => file,
-        owner   => root,
-        group   => root,
+        owner   => $user,
+        group   => $group,
         mode    => '0640',
         require => Package[$package],
         notify  => Service[$service],

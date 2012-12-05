@@ -64,14 +64,32 @@ class isc_dhcp( $interfaces = undef,
     $service = 'isc-dhcp-server'
     $conf_dir = '/etc/dhcp'
 
+    if $lsbdistid == 'Ubuntu' {
+        $user = 'dhcpd'
+        $group = $user
+
+        user { $user:
+            ensure  => present,
+            require => Package[$package],
+        }
+
+        group { $group:
+            ensure  => present,
+            require => Package[$package],
+        }
+    } else {
+        $user = 'root'
+        $group = $user
+    }
+
     package { $package:
         ensure  => installed,
     }
 
     file { '/etc/default/isc-dhcp-server':
         ensure  => file,
-        owner   => root,
-        group   => root,
+        owner   => $user,
+        group   => $group,
         mode    => '0644',
         content => template('isc_dhcp/isc-dhcp-server.erb'),
         require => Package[$package],
@@ -79,16 +97,16 @@ class isc_dhcp( $interfaces = undef,
 
     file { $conf_dir:
         ensure  => directory,
-        owner   => root,
-        group   => root,
+        owner   => $user,
+        group   => $group,
         mode    => '2774',
         require => Package[$package],
     }
 
     file { "$conf_dir/dhcpd.conf":
         ensure  => file,
-        owner   => root,
-        group   => root,
+        owner   => $user,
+        group   => $group,
         mode    => '0644',
         content => template('isc_dhcp/dhcpd.conf.erb'),
         require => Package[$package],
@@ -105,8 +123,8 @@ class isc_dhcp( $interfaces = undef,
     if $ddns_update_style != 'none' {
         file { "$conf_dir/dynamic-dns.key":
             ensure  => file,
-            owner   => root,
-            group   => root,
+            owner   => $user,
+            group   => $group,
             mode    => '0640',
             content => template('isc_dhcp/dynamic-dns.key.erb'),
             notify  => Service[$service],
@@ -114,8 +132,8 @@ class isc_dhcp( $interfaces = undef,
 
         file { "$conf_dir/dhcpd.conf.ddns":
             ensure  => file,
-            owner   => root,
-            group   => root,
+            owner   => $user,
+            group   => $group,
             mode    => '0644',
             content => template('isc_dhcp/dhcpd.conf.ddns.erb'),
             notify  => Service[$service],
@@ -128,8 +146,8 @@ class isc_dhcp( $interfaces = undef,
 
     file { $dhcpd_conf_local:
         ensure  => file,
-        owner   => root,
-        group   => root,
+        owner   => $user,
+        group   => $group,
         mode    => '0640',
         require => Package[$package],
         notify  => Service[$service],
@@ -137,8 +155,8 @@ class isc_dhcp( $interfaces = undef,
 
     file { $dhcpd_conf_local_file_fragments_directory:
         ensure  => directory,
-        owner   => root,
-        group   => root,
+        owner   => $user,
+        group   => $group,
         mode    => '0700',
         require => [Package[$package], File[$conf_dir]],
         recurse => true,
@@ -158,8 +176,8 @@ class isc_dhcp( $interfaces = undef,
 
     file { $dhcpd_conf_local_preamble:
         ensure  => file,
-        owner   => root,
-        group   => root,
+        owner   => $user,
+        group   => $group,
         mode    => '0600',
         require => Package[$package],
         content => template("isc_dhcp/dhcpd.conf.local_preamble.erb"),

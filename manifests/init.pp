@@ -69,7 +69,6 @@ class isc_dhcp( $interfaces = undef,
     $user = 'dhcpd'
     $group = 'dhcpd'
   } else {
-    fail('Should be Ubuntu!')
     $user = 'root'
     $group = 'root'
   }

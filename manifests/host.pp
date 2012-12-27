@@ -22,16 +22,18 @@
 #    }
 #
 define isc_dhcp::host($mac = undef,
-    $routers = undef,
-    $filename = undef) {
+  $routers = undef,
+  $filename = undef) {
 
-    file { "$isc_dhcp::dhcpd_conf_local_file_fragments_directory/01_dhcpd.conf.local_host_fragment_$name":
-        ensure  => file,
-        owner   => root,
-        group   => root,
-        mode    => '0644',
-        content => template('isc_dhcp/dhcpd.conf.local_host_fragment.erb'),
-        require => File[$isc_dhcp::dhcpd_conf_local_file_fragments_directory],
-        notify  => Exec[$isc_dhcp::dhcpd_conf_local_file_assemble],
-    }
+  file { "$isc_dhcp::dcl_ffd/01_dhcpd.conf.local_host_fragment_$name":
+    ensure  => file,
+    owner   => root,
+    group   => root,
+    mode    => '0644',
+    content => template('isc_dhcp/dhcpd.conf.local_host_fragment.erb'),
+    require => File[$isc_dhcp::dcl_ffd],
+    notify  => Exec[$isc_dhcp::dcl_file_assemble],
+  }
 }
+
+/* vim: set ts=2 sw=2 sts=2 tw=0 et:*/

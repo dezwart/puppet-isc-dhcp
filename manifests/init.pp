@@ -94,7 +94,7 @@ class isc_dhcp( $interfaces = undef,
     require => Package[$package],
   }
 
-  file { "$conf_dir/dhcpd.conf":
+  file { "${conf_dir}/dhcpd.conf":
     ensure  => file,
     owner   => root,
     group   => root,
@@ -108,11 +108,11 @@ class isc_dhcp( $interfaces = undef,
     enable    => true,
     pattern   => '/usr/sbin/dhcpd',
     require   => Package[$package],
-    subscribe => [ File['/etc/default/isc-dhcp-server'], File["$conf_dir/dhcpd.conf"] ],
+    subscribe => File['/etc/default/isc-dhcp-server', "${conf_dir}/dhcpd.conf"],
   }
 
   if $ddns_update_style != 'none' {
-    file { "$conf_dir/dynamic-dns.key":
+    file { "${conf_dir}/dynamic-dns.key":
       ensure  => file,
       owner   => $user,
       group   => $group,
@@ -121,7 +121,7 @@ class isc_dhcp( $interfaces = undef,
       notify  => Service[$service],
     }
 
-    file { "$conf_dir/dhcpd.conf.ddns":
+    file { "${conf_dir}/dhcpd.conf.ddns":
       ensure  => file,
       owner   => root,
       group   => root,
@@ -132,7 +132,7 @@ class isc_dhcp( $interfaces = undef,
   }
 
   # dhcpd.conf.local file fragments pattern, purges unmanaged files
-  $dcl = "$conf_dir/dhcpd.conf.local"
+  $dcl = "${conf_dir}/dhcpd.conf.local"
   $dcl_ffd = "${dcl}.d"
 
   file { $dcl:
@@ -176,4 +176,4 @@ class isc_dhcp( $interfaces = undef,
   }
 }
 
-/* vim: set ts=2 sw=2 sts=2 tw=0 et:*/
+# vim: set ts=2 sw=2 sts=2 tw=0 et:

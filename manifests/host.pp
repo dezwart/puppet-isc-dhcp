@@ -25,7 +25,7 @@ define isc_dhcp::host($mac = undef,
   $routers = undef,
   $filename = undef) {
 
-  file { "$isc_dhcp::dcl_ffd/01_dhcpd.conf.local_host_fragment_$name":
+  file { "${isc_dhcp::dcl_ffd}/01_dhcpd.conf.local_host_fragment_${name}":
     ensure  => file,
     owner   => root,
     group   => root,
@@ -36,4 +36,4 @@ define isc_dhcp::host($mac = undef,
   }
 }
 
-/* vim: set ts=2 sw=2 sts=2 tw=0 et:*/
+# vim: set ts=2 sw=2 sts=2 tw=0 et:

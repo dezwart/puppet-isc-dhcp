@@ -43,4 +43,22 @@ describe 'isc_dhcp' do
       should contain_exec(Isc_dhcp::DCL_FA)
     }
   end
+
+  context 'ddns_update' do
+    let(:params) {
+      {
+        :ddns_update_style => 'gungnam',
+      }
+    }
+
+    it {
+      should contain_file("#{Isc_dhcp::CONF_DIR}/dynamic-dns.key").with({
+        'ensure' => 'file',
+      })
+
+      should contain_file("#{Isc_dhcp::CONF_DIR}/dhcpd.conf.ddns").with({
+        'ensure' => 'file',
+      })
+    }
+  end
 end

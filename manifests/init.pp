@@ -61,9 +61,7 @@ class isc_dhcp( $interfaces = undef,
   $dynamic_dns_reverse_zone = undef,
   $dynamic_dns_ns_master = undef ) {
 
-  $package = 'isc-dhcp-server'
-  $service = 'isc-dhcp-server'
-  $conf_dir = '/etc/dhcp'
+  include isc_dhcp::params
 
   if $::lsbdistid == 'Ubuntu' {
     $user = 'dhcpd'
@@ -73,7 +71,7 @@ class isc_dhcp( $interfaces = undef,
     $group = 'root'
   }
 
-  package { $package:
+  package { $isc_dhcp::params::package:
     ensure  => installed,
   }
 
@@ -83,94 +81,92 @@ class isc_dhcp( $interfaces = undef,
     group   => root,
     mode    => '0644',
     content => template('isc_dhcp/isc-dhcp-server.erb'),
-    require => Package[$package],
+    require => Package[$isc_dhcp::params::package],
   }
 
-  file { $conf_dir:
+  file { $isc_dhcp::params::conf_dir:
     ensure  => directory,
     owner   => root,
     group   => root,
     mode    => '2774',
-    require => Package[$package],
+    require => Package[$isc_dhcp::params::package],
   }
 
-  file { "${conf_dir}/dhcpd.conf":
+  file { "${isc_dhcp::params::conf_dir}/dhcpd.conf":
     ensure  => file,
     owner   => root,
     group   => root,
     mode    => '0644',
     content => template('isc_dhcp/dhcpd.conf.erb'),
-    require => Package[$package],
+    require => Package[$isc_dhcp::params::package],
   }
 
-  service { $package:
+  service { $isc_dhcp::params::package:
     ensure    => running,
     enable    => true,
     pattern   => '/usr/sbin/dhcpd',
-    require   => Package[$package],
-    subscribe => File['/etc/default/isc-dhcp-server', "${conf_dir}/dhcpd.conf"],
+    require   => Package[$isc_dhcp::params::package],
+    subscribe => File['/etc/default/isc-dhcp-server',
+      "${isc_dhcp::params::conf_dir}/dhcpd.conf"],
   }
 
   if $ddns_update_style != 'none' {
-    file { "${conf_dir}/dynamic-dns.key":
+    file { "${isc_dhcp::params::conf_dir}/dynamic-dns.key":
       ensure  => file,
       owner   => $user,
       group   => $group,
       mode    => '0640',
       content => template('isc_dhcp/dynamic-dns.key.erb'),
-      notify  => Service[$service],
+      notify  => Service[$isc_dhcp::params::service],
     }
 
-    file { "${conf_dir}/dhcpd.conf.ddns":
+    file { "${isc_dhcp::params::conf_dir}/dhcpd.conf.ddns":
       ensure  => file,
       owner   => root,
       group   => root,
       mode    => '0644',
       content => template('isc_dhcp/dhcpd.conf.ddns.erb'),
-      notify  => Service[$service],
+      notify  => Service[$isc_dhcp::params::service],
     }
   }
 
-  # dhcpd.conf.local file fragments pattern, purges unmanaged files
-  $dcl = "${conf_dir}/dhcpd.conf.local"
-  $dcl_ffd = "${dcl}.d"
-
-  file { $dcl:
+  file { $isc_dhcp::params::dcl:
     ensure  => file,
     owner   => $user,
     group   => $group,
     mode    => '0640',
-    require => Package[$package],
-    notify  => Service[$service],
+    require => Package[$isc_dhcp::params::package],
+    notify  => Service[$isc_dhcp::params::service],
   }
 
-  file { $dcl_ffd:
+  file { $isc_dhcp::params::dcl_ffd:
     ensure  => directory,
     owner   => root,
     group   => root,
     mode    => '0700',
-    require => [Package[$package], File[$conf_dir]],
+    require => [ Package[$isc_dhcp::params::package],
+      File[$isc_dhcp::params::conf_dir]
+    ],
     recurse => true,
     purge   => true,
     notify  => Exec['dcl_file_assemble'],
   }
 
-  $dcl_file_assemble = 'dcl_file_assemble'
-  exec { $dcl_file_assemble:
+  exec { $isc_dhcp::params::dcl_file_assemble:
     refreshonly => true,
-    require     => [ File[$dcl_ffd], File[$dcl] ],
-    notify      => Service[$service],
-    command     => "/bin/cat ${dcl_ffd}/*_dhcpd.conf.local_* > ${dcl}",
+    require     => [ File[$isc_dhcp::params::dcl_ffd],
+      File[$isc_dhcp::params::dcl]
+    ],
+    notify      => Service[$isc_dhcp::params::service],
+    command     => "/bin/cat ${isc_dhcp::params::dcl_ffd}/*_dhcpd.conf.local_* > ${isc_dhcp::params::dcl}",
   }
 
-  $dcl_preamble = "${dcl_ffd}/00_dhcpd.conf.local_preamble"
-
-  file { $dcl_preamble:
+  file { $isc_dhcp::params::dcl_preamble:
     ensure  => file,
     owner   => root,
     group   => root,
     mode    => '0600',
-    require => Package[$package],
+    require => Package[$isc_dhcp::params::package],
     content => template('isc_dhcp/dhcpd.conf.local_preamble.erb'),
     notify  => Exec['dcl_file_assemble'],
   }

@@ -7,4 +7,5 @@ host <%= name %> {
   host-name <% hostname=name.split("\.")[0] %><%= hostname %>;
 <% if @routers %><% first = true %> option routers <% routers.each do |router| -%><% if first != true %>, <%= router %><% else %><%= router %><% first = false %><% end %><% end %><% end %>
 <% if @filename %>  filename "<%= filename %>";<% end %>
+<% if @next_server %>  next-server <%= next_server %>;<% end %>
 }

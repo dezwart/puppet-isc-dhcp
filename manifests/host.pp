@@ -21,13 +21,24 @@
 #        filename   => '/debian-netboot/pxelinux.0',
 #    }
 #
-define isc_dhcp::host($mac = undef,
+define isc_dhcp::host(
+  $mac = undef,
   $routers = undef,
-  $filename = undef) {
-
+  $filename = undef,
+  $next_server = undef,
+  $hostname = undef
+) {
   require isc_dhcp::params
 
-  file { "${isc_dhcp::params::dcl_ffd}/01_dhcpd.conf.local_host_fragment_${name}":
+  $fragment_name="01_dhcpd.conf.local_host_fragment_${name}"
+
+  if ( ! $hostname ) {
+    $host_name = regsubst($name, '^([^.]+).+$', '\1')
+  } else {
+    $host_name = $hostname
+  }
+
+  file { "${isc_dhcp::params::dcl_ffd}/${fragment_name}":
     ensure  => file,
     owner   => root,
     group   => root,
